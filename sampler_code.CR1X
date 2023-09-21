@@ -1,0 +1,6 @@
+
+BeginProg
+   PortSet(C2,1)
+   Delay(0,50,mSec)
+   PortSet(C2,0)
+EndProg
