@@ -1,2 +1,43 @@
-' This is a comment
 
+
+' Public variables
+
+Public Rain_in
+Public Tipped_count(100) As UINT1  ' Array for tip count
+Public Stage
+
+Units Rain_in = inch
+
+DataTable(Table1, True, -1)
+    DataInterval(0, 20, Sec, 10)
+    Totalize(1, Rain_in, String, False)
+EndTable
+
+DataTable(Data_table, True, -1)
+    Average(1,Stage,FP2,False)
+    DataInterval(0, 20, Sec, 10)
+    Field(1, "Tip_Count", "Tips", UINT1, "Tip Count")
+EndTable
+
+'Main Program
+BeginProg
+    'Main Scan
+    Scan(1, Sec, 1, 0)
+
+        'Generic 4-20 mA (2-wire with internal shunt and datalogger power) measurement 'Stage'
+        CurrentSE(Stage,1,mV1000,RG1,True,0,60,4.6875,-14.75)
+        'Generic Tipping Bucket Rain Gauge measurement 'Rain_in'
+        PulseCount(Rain_in, 1, P1, 1, 0, 0.01, 0)
+
+        If Rain_in > 0 Then
+
+            Tipped_count(1) = Tipped_count(1) + 1
+
+            CallTable Table1
+            CallTable Data_table
+            
+        EndIf
+    NextScan
+EndProg
+
+	

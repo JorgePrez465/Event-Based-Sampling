@@ -1,0 +1,38 @@
+'CR1000X Series
+'Created by Short Cut (4.4)
+
+'Declare Variables and Units
+Public BattV
+Public PTemp_C
+Public Rain_in
+
+Units BattV=Volts
+Units PTemp_C=Deg C
+Units Rain_in=inch
+
+'Define Data Tables
+DataTable(Table1,True,-1)
+	DataInterval(0,20,Sec,10)
+	Totalize(1,Rain_in,FP2,False)
+EndTable
+
+DataTable(Table2,True,-1)
+	DataInterval(0,1440,Min,10)
+	Minimum(1,BattV,FP2,False,False)
+EndTable
+
+'Main Program
+BeginProg
+	'Main Scan
+	Scan(1,Sec,1,0)
+		'Default CR1000X Datalogger Battery Voltage measurement 'BattV'
+		Battery(BattV)
+		'Default CR1000X Datalogger Wiring Panel Temperature measurement 'PTemp_C'
+		PanelTemp(PTemp_C,60)
+		'Generic Tipping Bucket Rain Gauge measurement 'Rain_in'
+		PulseCount(Rain_in,1,P1,1,0,0.01,0)
+		'Call Data Tables and Store Data
+		CallTable Table1
+		CallTable Table2
+	NextScan
+EndProg
