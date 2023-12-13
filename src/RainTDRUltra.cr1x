@@ -14,7 +14,7 @@ Alias TDR(1)=VWC
 Alias TDR(2)=EC
 Alias TDR(3)=T
 
-Units BattV=Volts
+Units Batt_V=Volts
 Units PanelTemp_C=Deg C
 Units Ultrasonic=in
 Units Rain_inch=inch
@@ -23,7 +23,7 @@ Units EC=dS/m
 Units T=Deg C
 
 'Define Data Tables
-DataTable(Data_Table,True,-1)
+DataTable(Data_TableA,True,-1)
 	DataInterval(0,5,Min,10)
 	Average(1,Ultrasonic,FP2,False)
 	Average(1,VWC,FP2,False)
@@ -35,7 +35,7 @@ EndTable
 
 BeginProg
 	Scan(1,Sec,1,0)
-		Battery(BattV)
+		Battery(Batt_V)
 		PanelTemp(PanelTemp_C,60)
 		
 		PulseCount(Rain_inch,1,P1,1,0,0.01,0)
@@ -45,6 +45,8 @@ BeginProg
 		EndIf
 		If Elapsed >= 24 Then
 			SW12(SW12_1,0)
+			Raining = 0
+			Timer(1, hr, 3)
 		EndIf
 		If Raining Then
 			SW12(SW12_1,1)
@@ -54,7 +56,8 @@ BeginProg
 			SDI12Recorder(TDR(),C3,"0","M!",1,0,-1)
 		EndIf	
 		Elapsed = Timer(1,hr, 4)
-		CallTable Table1
+		CallTable Data_TableA
 	NextScan
 EndProg
 
+' Timer 0 = start, 1= stop,  2 = reset and start, 3 = stop and reset, 4 = read only
