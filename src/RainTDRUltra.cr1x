@@ -41,7 +41,7 @@ BeginProg
 		PulseCount(Rain_inch,1,P1,1,0,0.01,0)
 		If Rain_inch > 0 Then 
 			Timer(1, hr, 2)
-			Raining = 1
+			Raining = 1 ' True 
 		EndIf
 		If Elapsed >= 24 Then
 			SW12(SW12_1,0)
@@ -50,10 +50,13 @@ BeginProg
 		EndIf
 		If Raining Then
 			SW12(SW12_1,1)
-			CurrentSE(Ultrasonic,1,mV1000,RG1,True,0,60,4.6875,-14.75)	
+			CurrentSE(Ultrasonic,1,Autorange,RG1,True,0,60,4.6875,-14.75)	' Freq = 60Hz
 		EndIf
 		If TimeIntoInterval(0,1,Hr) Then
 			SDI12Recorder(TDR(),C3,"0","M!",1,0,-1)
+		EndIf
+		If TimeIntoInterval(0,1,Min) Then
+			SDI12Recorder(LVData(),C7,"0","M!",1,0,-1)
 		EndIf	
 		Elapsed = Timer(1,hr, 4)
 		CallTable Data_TableA
@@ -61,3 +64,4 @@ BeginProg
 EndProg
 
 ' Timer 0 = start, 1= stop,  2 = reset and start, 3 = stop and reset, 4 = read only
+' CurrentSE ( Dest, Reps, Range, RGChan, MeasOff, SettlingTime, freq, Multiplier, Offset)
