@@ -1,0 +1,54 @@
+'CR1000X Series
+'Created by Short Cut (4.4)
+
+'Declare Variables and Units
+Public BattV
+Public PTemp_C
+Public LVData(8)
+
+Alias LVData(1)=Stage
+Alias LVData(2)=Line_PSI
+Alias LVData(3)=Tank_PSI
+Alias LVData(4)=LVB10_Temp
+Alias LVData(5)=LVB10_Batt
+Alias LVData(6)=LVB10_ErrorCode
+Alias LVData(7)=Crest_Stage
+Alias LVData(8)=Crest_Tm_Offs
+
+Units BattV=Volts
+Units PTemp_C=Deg C
+Units Stage=feet
+Units Line_PSI=PSI
+Units Tank_PSI=PSI
+Units LVB10_Temp=Deg C
+Units LVB10_Batt=volts
+Units LVB10_ErrorCode=code
+Units Crest_Stage=feet
+Units Crest_Tm_Offs=seconds
+
+'Define Data Tables
+DataTable(Table1,True,-1)
+	DataInterval(0,60,Min,10)
+	Average(1,Stage,FP2,False)
+	Sample(1,Stage,FP2)
+	Sample(1,Line_PSI,FP2)
+EndTable
+
+'Main Program
+BeginProg
+	'Main Scan
+	Scan(5,Sec,1,0)
+		'Default CR1000X Datalogger Battery Voltage measurement 'BattV'
+		Battery(BattV)
+		'Default CR1000X Datalogger Wiring Panel Temperature measurement 'PTemp_C'
+		PanelTemp(PTemp_C,60)
+		'LevelVUEB10 Water-Level Continuous Flow Bubbler measurements 'Stage', 'Line_PSI',Tank_PSI',
+		'LVB10_Temp', 'LVB10_Batt', 'LVB10_ErrorCode', 'Crest_Stage', and 'Crest_Tm_Offs'
+		If TimeIntoInterval(0,15,Min) Then
+			SDI12Recorder(LVData(),C1,"0","M!",1,0,-1)
+		EndIf
+		'Call Data Tables and Store Data
+		CallTable Table1
+		CallTable Table2
+	NextScan
+EndProg
