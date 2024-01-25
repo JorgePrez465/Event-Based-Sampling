@@ -28,11 +28,13 @@ Units Rain_inch=inch
 Units VWC=m^3/m^3
 Units EC=dS/m
 Units T=Deg C
+Units Line_PSI=PSI
+Units Tank_PSI=PSI
+Units Stage=feet
 
 'Define Data Tables
 DataTable(Data_TableA,True,-1)
 	DataInterval(0,5,Min,10)
-	DataInterval(0,60,Min,10)
 	Average(1,Stage,FP2,False)
 	Sample(1,Stage,FP2)
 	Sample(1,Line_PSI,FP2)
@@ -53,15 +55,15 @@ BeginProg
 			Timer(1, hr, 2)
 			Raining = 1 ' True 
 		EndIf
-		If Elapsed >= 10 Then ' if 10 hours after raining starts have passed
+		If Elapsed >= 4 Then ' if 4 hours after raining starts have passed
 			Raining = 0
 			Timer(1, hr, 3)
 		EndIf
 		If TimeIntoInterval(0,1,Hr) Then
 			SDI12Recorder(TDR(),C3,"0","M!",1,0,-1)
 		EndIf
-		If TimeIntoInterval(0,10,Min) AND Raining Then
-			SDI12Recorder(LVData(),C7,"0","M!",1,0,-1)
+		If TimeIntoInterval(0,5,min) AND Raining Then
+			SDI12Recorder(BubblerData(),C7,"0","M!",1,0,-1)
 		EndIf
 		Elapsed = Timer(1,hr, 4)
 		CallTable Data_TableA
