@@ -28,7 +28,7 @@ Units Crest_Tm_Offs=seconds
 
 'Define Data Tables
 DataTable(Table1,True,-1)
-	DataInterval(0,60,Min,10)
+	DataInterval(0,5,sEC,10)
 	Average(1,Stage,FP2,False)
 	Sample(1,Stage,FP2)
 	Sample(1,Line_PSI,FP2)
@@ -44,11 +44,11 @@ BeginProg
 		PanelTemp(PTemp_C,60)
 		'LevelVUEB10 Water-Level Continuous Flow Bubbler measurements 'Stage', 'Line_PSI',Tank_PSI',
 		'LVB10_Temp', 'LVB10_Batt', 'LVB10_ErrorCode', 'Crest_Stage', and 'Crest_Tm_Offs'
-		If TimeIntoInterval(0,15,Min) Then
+		If TimeIntoInterval(0,5,Sec) Then
 			SDI12Recorder(LVData(),C1,"0","M!",1,0,-1)
 		EndIf
 		'Call Data Tables and Store Data
 		CallTable Table1
-		CallTable Table2
+		
 	NextScan
 EndProg

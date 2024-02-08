@@ -30,7 +30,7 @@ Units EC=dS/m
 Units T=Deg C
 Units Line_PSI=PSI
 Units Tank_PSI=PSI
-Units Stage=feet
+Units Stage=inch
 
 'Define Data Tables
 DataTable(Data_TableA,True,-1)
@@ -42,6 +42,7 @@ DataTable(Data_TableA,True,-1)
 	Average(1,EC,FP2,False)
 	Average(1,T,FP2,False)
 	Totalize(1,Rain_inch,FP2,False)
+	Average(1,Ultrasonic,FP2,False)
 EndTable
 
 
@@ -59,9 +60,14 @@ BeginProg
 			Raining = 0
 			Timer(1, hr, 3)
 		EndIf
+		If Raining Then
+			SW12(SW12_1,1)
+			CurrentSE(Ultrasonic,1,Autorange,RG2,True,0,50,0,1)	' Freq = 50Hz
+		EndIf
 		If TimeIntoInterval(0,1,Hr) Then
 			SDI12Recorder(TDR(),C3,"0","M!",1,0,-1)
 		EndIf
+
 		If TimeIntoInterval(0,5,min) AND Raining Then
 			SDI12Recorder(BubblerData(),C7,"0","M!",1,0,-1)
 		EndIf

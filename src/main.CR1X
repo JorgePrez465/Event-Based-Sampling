@@ -1,62 +1,85 @@
 'CR1000X Series
-'Created by Short Cut (4.4)
+'Created by Jorge Perez (JorgePrez465)
 
 'Declare Variables and Units
-Public Temp_C
+Public Batt_V
+Public PanelTemp_C
 Public Ultrasonic
-Public Rain_in
-Public CS65X(3)
-Public Raining
+Public Rain_inch
+Public TDR(3)
+Public Raining As BOOLEAN
+Public Elapsed
+Public BubblerData(3)
+Public WaterSamples As UINT1
 
-Alias CS65X(1)=Soil_VWC
-Alias CS65X(2)=Soil_EC
-Alias CS65X(3)=Soil_T
+' Bubbler Data, assign a name to each array component from SDI-12
+Alias BubblerData(1)=BubblerStageInch
+Alias BubblerData(2)=Line_PSI
+Alias BubblerData(3)=Tank_PSI
 
-Units BattV=Volts
-Units PTemp_C=Deg C
-Units Measure=in
-Units Rain_in=inch
+' TDR Data array
+Alias TDR(1)=VWC
+Alias TDR(2)=EC
+Alias TDR(3)=T
+
+
+Units Batt_V=Volts
+Units PanelTemp_C=Deg C
+Units Rain_inch=inch
 Units VWC=m^3/m^3
 Units EC=dS/m
 Units T=Deg C
+Units Line_PSI=PSI
+Units Tank_PSI=PSI
+Units BubblerStageInch=inch
 
 'Define Data Tables
 DataTable(Data_Table,True,-1)
 	DataInterval(0,5,Min,10)
-	
-	TableFile("USB:"+Status.SerialNumber+"Data_Table",8,-1,0,0,Hr,0,0)
+	Average(1,BubblerStageInch,FP2,False)
+	Sample(1,BubblerStageInch,FP2)
+	Sample(1,Line_PSI,FP2)
+	Average(1,VWC,FP2,False)
+	Average(1,EC,FP2,False)
+	Average(1,T,FP2,False)
+	Totalize(1,Rain_inch,FP2,False)
 	Average(1,Ultrasonic,FP2,False)
-	Average(1,Soil_VWC,FP2,False)
-	Average(1,Soil_EC,FP2,False)
-	Average(1,Soil_T,FP2,False)
-	Totalize(1,Rain_in,FP2,False)
-	Maximum(1,Ultrasonic,FP2,False,True)
-	Minimum(1,Ultrasonic,FP2,False,True)
 EndTable
 
-'Main Program
+
 BeginProg
-	'Main Scan
 	Scan(1,Sec,1,0)
-		'Default CR1000X Datalogger Wiring Panel Temperature measurement 'PTemp_C'
-		PanelTemp(PTemp_C,60)
-		'Generic 4-20 mA (2-wire with internal shunt and datalogger power) measurement 'Measure'
-		CurrentSE(Ultrasonic,1,mV1000,RG1,True,0,60,4.6875,-14.75)
-		'CS700 Rain Gauge measurement 'Rain_in'
-		PulseCount(Rain_in,1,P1,1,0,0.01,0)
-		' If Rain Gauge measurement is greater than 0, set Rainig flag to True
-		Raining = IIF(Rain_in > 0, 1, 0)
-		If Raining Then 
-			'Turn Ultrasonic ON'
-			'SW1 turned on for 2 hours after ultrasonic measurement reaches 0.
+		Battery(Batt_V)
+		PanelTemp(PanelTemp_C,60)
+		
+		PulseCount(Rain_inch,1,P1,1,0,0.01,0)
+		If Rain_inch > 0 Then 
+			Timer(1, hr, 2)
+			Raining = 1 ' True 
+		EndIf
+		If Elapsed >= 4 Then ' if 4 hours after raining starts have passed
+			Raining = 0
+			Timer(1, hr, 3)
+		EndIf
+		If Raining Then
 			SW12(SW12_1,1)
-			'
+			CurrentSE(Ultrasonic,1,Autorange,RG2,True,0,50,0,1)	' Freq = 50Hz
 		EndIf
-		'CS650/CS655 Water Content Reflectometer measurements 'VWC', 'EC', and 'T'
 		If TimeIntoInterval(0,1,Hr) Then
-			SDI12Recorder(CS65X(),C3,"0","M!",1,0,-1)
+			SDI12Recorder(TDR(),C3,"0","M!",1,0,-1)
 		EndIf
-		'Call Data Tables and Store Data
-		CallTable Table1
+
+		If TimeIntoInterval(0,5,sec) AND Raining Then
+			SDI12Recorder(BubblerData(),C7,"0","M!",1,0,-1)
+		EndIf
+		''If BubblerStageInch > 1.0 AND Raining Then 
+		''	PortSet(C2,1)
+   		''	Delay(0,50,mSec)
+   		''	PortSet(C2,0) 
+		''	WaterSamples = WaterSamples + 1
+		''EndIf
+		Elapsed = Timer(1,hr, 4)
+		CallTable Data_Table
 	NextScan
 EndProg
+
