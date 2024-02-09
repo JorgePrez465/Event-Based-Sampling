@@ -1,28 +1,33 @@
 'CR1000X Series
-'Created by Jorge Perez (JorgePrez465)
+'Created by Jorge Perez (github: JorgePrez465)
 
-'Declare Variables and Units
+' Datalogger variables
 Public Batt_V
 Public PanelTemp_C
+
+' Sensors
 Public Ultrasonic
 Public Rain_inch
 Public TDR(3)
-Public Raining As BOOLEAN
-Public Elapsed
 Public BubblerData(3)
+
+' Program Variables
+Public Raining As BOOLEAN
+Public RainingTimeElapsed
+Public TimeSinceLastSample
 Public WaterSamples As UINT1
 
 ' Bubbler Data, assign a name to each array component from SDI-12
-Alias BubblerData(1)=BubblerStageInch
-Alias BubblerData(2)=Line_PSI
-Alias BubblerData(3)=Tank_PSI
+Alias BubblerData(1) = BubblerStageInch
+Alias BubblerData(2) = Line_PSI
+Alias BubblerData(3) = Tank_PSI
 
 ' TDR Data array
-Alias TDR(1)=VWC
-Alias TDR(2)=EC
-Alias TDR(3)=T
+Alias TDR(1) = VWC
+Alias TDR(2) = EC
+Alias TDR(3) = T
 
-
+' Asigning units
 Units Batt_V=Volts
 Units PanelTemp_C=Deg C
 Units Rain_inch=inch
@@ -33,52 +38,80 @@ Units Line_PSI=PSI
 Units Tank_PSI=PSI
 Units BubblerStageInch=inch
 
+' Private Variables 
+Dim ReadyToSample As BOOLEAN 
+
+
 'Define Data Tables
-DataTable(Data_Table,True,-1)
-	DataInterval(0,5,Min,10)
-	Average(1,BubblerStageInch,FP2,False)
-	Sample(1,BubblerStageInch,FP2)
-	Sample(1,Line_PSI,FP2)
-	Average(1,VWC,FP2,False)
-	Average(1,EC,FP2,False)
-	Average(1,T,FP2,False)
-	Totalize(1,Rain_inch,FP2,False)
-	Average(1,Ultrasonic,FP2,False)
+DataTable(Data_Table, True, -1)
+	DataInterval(0, 5, Min, 10)
+	Average(1, BubblerStageInch, FP2, False)
+	Sample(1, BubblerStageInch ,FP2)
+	Sample(1, Line_PSI, FP2)
+	Average(1, VWC, FP2, False)
+	Average(1, EC, FP2, False)
+	Average(1, T, FP2, False)
+	Totalize(1, Rain_inch, FP2, False)
+	Average(1, Ultrasonic, FP2, False)
 EndTable
 
 
 BeginProg
-	Scan(1,Sec,1,0)
+	' Initialize ReadyToSample so it takes the first sample as soon as it can
+	ReadyToSample = 1  
+
+	Scan(1, Sec, 1, 0)
+
 		Battery(Batt_V)
-		PanelTemp(PanelTemp_C,60)
+		PanelTemp(PanelTemp_C, 60)
 		
-		PulseCount(Rain_inch,1,P1,1,0,0.01,0)
+		PulseCount(Rain_inch, 1, P1, 1, 0, 0.01, 0)
+		' Every time the tipping bucket tips, Raining Variable restarts
 		If Rain_inch > 0 Then 
 			Timer(1, hr, 2)
 			Raining = 1 ' True 
 		EndIf
-		If Elapsed >= 4 Then ' if 4 hours after raining starts have passed
-			Raining = 0
-			Timer(1, hr, 3)
-		EndIf
-		If Raining Then
-			SW12(SW12_1,1)
-			CurrentSE(Ultrasonic,1,Autorange,RG2,True,0,50,0,1)	' Freq = 50Hz
-		EndIf
-		If TimeIntoInterval(0,1,Hr) Then
-			SDI12Recorder(TDR(),C3,"0","M!",1,0,-1)
+
+		' If 10 minutes from last sample have passed, take another sample
+		If TimeSinceLastSample >= 10 Then
+			ReadyToSample = 1
 		EndIf
 
-		If TimeIntoInterval(0,5,sec) AND Raining Then
-			SDI12Recorder(BubblerData(),C7,"0","M!",1,0,-1)
+		' If 4 hours from last tip, raining is False and resets timer
+		If RainingTimeElapsed >= 4 Then 
+			Raining = 0
+			WaterSamples = 0
+			Timer(1, hr, 3)
 		EndIf
-		''If BubblerStageInch > 1.0 AND Raining Then 
-		''	PortSet(C2,1)
-   		''	Delay(0,50,mSec)
-   		''	PortSet(C2,0) 
-		''	WaterSamples = WaterSamples + 1
-		''EndIf
-		Elapsed = Timer(1,hr, 4)
+
+		' If raining is True, read ultrasonic data.
+		If Raining Then
+			SW12(SW12_1, 1)
+			CurrentSE(Ultrasonic, 1, Autorange, RG2, True, 0, 50, 0, 1)	' Freq = 50Hz
+		EndIf
+
+		If TimeIntoInterval(0, 1, Hr) Then
+			SDI12Recorder(TDR(), C3, "0", "M!", 1, 0, -1)
+		EndIf
+
+		If TimeIntoInterval(0, 5, sec) AND Raining Then
+			SDI12Recorder(BubblerData(), C7, "0", "M!", 1, 0, -1)
+		EndIf
+
+		If BubblerStageInch >= 1.0 AND ReadyToSample Then 
+			ReadyToSample = 0
+			PortSet(C2, 1)
+   			Delay(0, 25 , mSec)
+			PortSet(C2, 0)
+			Timer(2, min, 2)
+			WaterSamples = WaterSamples + 1
+		EndIf
+
+		 
+		' Timer(TimerNumber, TimeUnits, TOptions: 0-Start, 1-stop, 2-reset, 3-stop&restet, 4-ReadOnly)
+		TimeSinceLastSample = Timer(2, min, 4) 
+		RainingTimeElapsed = Timer(1, hr, 4)
+
 		CallTable Data_Table
 	NextScan
 EndProg
