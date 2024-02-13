@@ -81,6 +81,8 @@ BeginProg
 		If RainingTimeElapsed >= 4 Then 
 			Raining = 0
 			WaterSamples = 0
+			SW12(SW12_1, 0)
+			Ultrasonic = 0
 			Timer(1, hr, 3)
 		EndIf
 

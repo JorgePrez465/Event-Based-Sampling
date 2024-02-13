@@ -12,13 +12,13 @@ Next, you'll need to adjust the gain and offset parameters in the `CurrentSE` fu
 
 For example, if your sensor outputs a current of 4 mA for 0 mm and 20 mA for a certain maximum distance (let's say 10668mm = 35ft), you could calculate the gain and offset as follows:
 
-- Gain = (10668 mm - 0 mm) / (20 mA - 4 mA) = 666.75 mm/mA
-- Offset = 0 mm - (Gain * 4 mA) = -2,667 mm
+- Gain = (35 ft - 0.5 ft) / (20 mA - 4 mA) = 2.15625 ft/mA
+- Offset = 0.5 ft - (Gain * 4 mA) = -8.575 ft
 
 So your `CurrentSE` function would look like this:
 
 ```cr-basic
-CurrentSE(Ultrasonic,1,Autorange,RG1,True,0,50,666.75,-2667)	' Freq = 50Hz
+CurrentSE(Ultrasonic,1,Autorange,RG1,True,0,50,Gain,Offset)	' Freq = 50Hz
 ```
 
 Please note that these are just example values. You'll need to replace them with the actual values for your specific sensor.
