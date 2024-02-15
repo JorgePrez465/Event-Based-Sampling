@@ -12,8 +12,8 @@ Next, you'll need to adjust the gain and offset parameters in the `CurrentSE` fu
 
 For example, if your sensor outputs a current of 4 mA for 0 mm and 20 mA for a certain maximum distance (let's say 10668mm = 35ft), you could calculate the gain and offset as follows:
 
-- Gain = (35 ft - 0.5 ft) / (20 mA - 4 mA) = 2.15625 ft/mA
-- Offset = 0.5 ft - (Gain * 4 mA) = -8.575 ft
+- Gain = (79 in - 4 in) / (20 mA - 4 mA) = 4.6875 in/mA 
+- Offset = 4 in - (Gain * 4 mA) = -14.75 in
 
 So your `CurrentSE` function would look like this:
 

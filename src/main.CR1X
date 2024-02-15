@@ -53,6 +53,7 @@ DataTable(Data_Table, True, -1)
 	Average(1, T, FP2, False)
 	Totalize(1, Rain_inch, FP2, False)
 	Average(1, Ultrasonic, FP2, False)
+	Maximum(1, WaterSamples, FP2,False,True)
 EndTable
 
 
@@ -88,8 +89,8 @@ BeginProg
 
 		' If raining is True, read ultrasonic data.
 		If Raining Then
-			SW12(SW12_1, 1)
-			CurrentSE(Ultrasonic, 1, Autorange, RG2, True, 0, 50, 0, 1)	' Freq = 50Hz
+			SW12(SW12_1, 1) 
+			CurrentSE(Ultrasonic, 1, mv1000, RG2, True, 0, 60, 4.6875,-14.75)	' Freq = 50Hz
 		EndIf
 
 		If TimeIntoInterval(0, 1, Hr) Then
