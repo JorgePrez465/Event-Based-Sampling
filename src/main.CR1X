@@ -7,6 +7,7 @@ Public PanelTemp_C
 
 ' Sensors
 Public Ultrasonic
+Public raw_ultrasonic
 Public Rain_inch
 Public TDR(3)
 Public BubblerData(3)
@@ -53,7 +54,8 @@ DataTable(Data_Table, True, -1)
 	Average(1, T, FP2, False)
 	Totalize(1, Rain_inch, FP2, False)
 	Average(1, Ultrasonic, FP2, False)
-	Maximum(1, WaterSamples, FP2,False,True)
+	Average(1, raw_ultrasonic, FP2, False)
+	''Maximum(1, WaterSamples, FP2,False,True)
 EndTable
 
 
@@ -83,6 +85,7 @@ BeginProg
 			Raining = 0
 			WaterSamples = 0
 			SW12(SW12_1, 0)
+			raw_ultrasonic = 0
 			Ultrasonic = 0
 			Timer(1, hr, 3)
 		EndIf
@@ -90,6 +93,7 @@ BeginProg
 		' If raining is True, read ultrasonic data.
 		If Raining Then
 			SW12(SW12_1, 1) 
+			CurrentSE(raw_ultrasonic,1, mv1000, RG2, True, 0, 60, 1, 0)
 			CurrentSE(Ultrasonic, 1, mv1000, RG2, True, 0, 60, 4.6875,-14.75)	' Freq = 50Hz
 		EndIf
 
