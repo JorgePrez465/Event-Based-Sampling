@@ -1,6 +1,0 @@
-
-BeginProg
-  PortSet(2,1)
-  Delay(0,50,mSec)
-  PortSet(2,0)
-EndProg

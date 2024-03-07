@@ -24,8 +24,10 @@ BeginProg
 		Battery(BattV)
 		'Default CR1000X Datalogger Wiring Panel Temperature measurement 'PTemp_C'
 		PanelTemp(PTemp_C,60)
+		SW12(SW12_1, 1)
 		'Generic 4-20 mA (2-wire with internal shunt and datalogger power) measurement 'Measure'
-		CurrentSE(Measure,1,mV1000,RG1,True,0,60,2.15625,-8.125)
+		CurrentSE(Measure,1, mv1000, RG2, True, 0, 60, 1, 0)
+		CurrentSE(Measure,1, mv1000, RG2, True, 0, 60, 4.6875,-14.75)
 		'Call Data Tables and Store Data
 		CallTable Table2
 	NextScan
