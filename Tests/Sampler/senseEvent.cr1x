@@ -1,0 +1,17 @@
+Public events
+
+DataTable (Sampler,1,1000)
+    Totalize(1, events,FP2,False)
+EndTable
+
+BeginProg
+    Scan (1,Sec, 0, 0)
+
+        PulseCount(events,1,P2,0,0,1.0,0)
+        ''PortSet(C2, 1)
+        ''Delay(0, 25 , mSec)
+        ''PortSet(C2, 0)
+        CallTable Sampler
+
+    NextScan
+EndProg

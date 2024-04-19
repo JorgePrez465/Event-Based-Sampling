@@ -1,0 +1,17 @@
+'CR1000X Series
+'Created by Short Cut (4.4)
+
+'Declare Variables and Units
+Public BattV
+Public PTemp_C
+Public PStat
+
+Units BattV=Volts
+Units PTemp_C=Deg C
+Units PStat=On/Off
+
+
+'Main Program
+BeginProg
+	PortSet(C1, 0)
+EndProg
