@@ -109,7 +109,7 @@ BeginProg
 			SDI12Recorder(BubblerData(), C7, "0", "M!", 1, 0, -1)
 		EndIf
 
-		If BubblerStageInch >= 0.51 AND ReadyToSample AND Raining Then 
+		If BubblerStageInch >= 0.51 AND ReadyToSample AND Raining Then ' Quitar raining
 			ReadyToSample = 0
 			PortSet(C2, 1)
    			Delay(0, 25 , mSec)
