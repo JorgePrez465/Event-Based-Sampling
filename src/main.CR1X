@@ -54,25 +54,26 @@ DataTable(Data_Table, True, -1)
 	Average(1, EC, FP2, False)
 	Average(1, T, FP2, False)
 	Totalize(1, Rain_inch, FP2, False)
-	Average(1, Ultrasonic, FP2, False)
+	Average(1, Ultrasonic, FP2, False) ' Distance to water
 	Average(1, raw_ultrasonic, FP2, False)
-	''Maximum(1, WaterSamples, FP2,False,True)
+	Totalize(1, WaterSamples, FP2, False)
+
 EndTable
 
 
 BeginProg
-	' Initialize ReadyToSample so it takes the first sample as soon as it can
+	' Initialize ReadyToSample so it takes the first sample as soon as it can collect sample
 	ReadyToSample = 1  
 
-	Scan(1, Sec, 1, 0)
+	Scan(15, Sec, 5, 0)
 
 		Battery(Batt_V)
 		PanelTemp(PanelTemp_C, 60)
 		
-		PulseCount(Rain_inch, 1, P1, 1, 0, 0.01, 0)
+		PulseCount(Rain_inch, 1, P1, 1, 0, 0.01, 0) ' Tipping bucket, each tip = 0.01 inch
 		' Every time the tipping bucket tips, Raining Variable restarts
 		If Rain_inch > 0 Then 
-			Timer(1, hr, 2)
+			Timer(1, hr, 2) ' Timer to measure raining elapsed time
 			Raining = 1 ' True 
 		EndIf
 
@@ -82,9 +83,10 @@ BeginProg
 		EndIf
 
 		' If 4 hours from last tip, raining is False and resets timer
+		' If it's not raining after 4 hours turn off Bubbler and ultrasonic
 		If RainingTimeElapsed >= 4 Then 
 			Raining = 0
-			PortSet(C1, 0)
+			PortSet(C1, 0) ' turn Bubbler off
 			WaterSamples = 0
 			SW12(SW12_1, 0)
 			raw_ultrasonic = 0
@@ -100,15 +102,10 @@ BeginProg
 			CurrentSE(Ultrasonic, 1, mv1000, RG2, True, 0, 60, 4.6875,-14.75)	' Freq = 50Hz
 		EndIf
 
+		SDI12Recorder(TDR(), C3, "0", "M!", 1, 0, -1)
 
-		If TimeIntoInterval(0, 1, Hr) Then
-			SDI12Recorder(TDR(), C3, "0", "M!", 1, 0, -1)
-		EndIf
-
-		If TimeIntoInterval(0, 5, sec) AND Raining Then
-			SDI12Recorder(BubblerData(), C7, "0", "M!", 1, 0, -1)
-		EndIf
-
+		SDI12Recorder(BubblerData(), C7, "0", "M!", 1, 0, -1)
+	
 		If BubblerStageInch >= 0.51 AND ReadyToSample AND Raining Then ' Quitar raining
 			ReadyToSample = 0
 			PortSet(C2, 1)
