@@ -63,7 +63,10 @@ EndTable
 
 BeginProg
 	' Initialize ReadyToSample so it takes the first sample as soon as it can collect sample
-	ReadyToSample = 1  
+	ReadyToSample = 1 
+
+	' Temporary, This turns on the PoE switch which turns on the cameras and router 
+	PortSet(C4, 1)
 
 	Scan(15, Sec, 5, 0)
 
